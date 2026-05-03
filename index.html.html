@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Boutique</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #666;
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 30px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 20px 16px 0;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+
+  .brand span { color: var(--accent); }
+
+  .cart-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cart-count {
+    background: var(--accent);
+    color: #000;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* SEARCH */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 10px 16px 10px 38px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap input::placeholder { color: var(--muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  /* FILTERS */
+  .filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+
+  .filter-btn {
+    flex-shrink: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 7px 14px;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+
+  /* SORT */
+  .sort-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 8px;
+  }
+
+  .results-count {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .sort-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 10px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
+  }
+
+  .card:active { transform: scale(0.97); }
+
+  .card-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+  }
+
+  .badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--accent2);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge.new { background: var(--accent); color: #000; }
+
+  .card-body { padding: 10px 10px 12px; }
+
+  .card-cat {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 3px;
+  }
+
+  .card-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .price {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+  }
+
+  .add-btn {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s;
+  }
+
+  .add-btn:active { transform: scale(0.9); }
+
+  /* EMPTY */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    grid-column: 1 / -1;
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    backdrop-filter: blur(4px);
+    align-items: flex-end;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-img {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    margin-bottom: 16px;
+    object-fit: cover;
+  }
+
+  .modal-cat {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .modal-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .modal-desc {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .modal-price {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .modal-add-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .modal-add-btn:active { opacity: 0.8; }
+
+  .close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="brand">Drop<span>.</span></div>
+    <button class="cart-btn" onclick="showCart()">
+      🛒 Panier
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Rechercher un produit..." oninput="renderProducts()">
+  </div>
+  <div class="filters" id="filters"></div>
+</header>
+
+<div class="sort-row">
+  <span class="results-count" id="resultsCount"></span>
+  <select class="sort-select" id="sortSelect" onchange="renderProducts()">
+    <option value="default">Tri par défaut</option>
+    <option value="price-asc">Prix ↑</option>
+    <option value="price-desc">Prix ↓</option>
+    <option value="name">Nom A-Z</option>
+  </select>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-img" id="modalImg"></div>
+    <div class="modal-cat" id="modalCat"></div>
+    <div class="modal-name" id="modalName"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-price" id="modalPrice"></div>
+    <button class="modal-add-btn" id="modalAddBtn">Ajouter au panier</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== DONNÉES ==========
+// 👉 Modifie cette liste avec tes vrais produits !
+const PRODUCTS = [
+  { id:1, name:"Air Force 1 Low", cat:"Sneakers", price:110, emoji:"👟", badge:"new", desc:"Le classique indémodable. Cuir premium, semelle Air amortissante. Disponible en blanc et noir." },
+  { id:2, name:"Hoodie Essentials", cat:"Vêtements", price:65, emoji:"👕", badge:null, desc:"Coton épais 400g, coupe oversize. Parfait pour l'hiver. 5 coloris disponibles." },
+  { id:3, name:"Casquette Logo", cat:"Accessoires", price:28, emoji:"🧢", badge:null, desc:"Casquette 6 panneaux, broderie ton sur ton. Réglable, taille unique." },
+  { id:4, name:"Jordan 1 Retro", cat:"Sneakers", price:180, emoji:"👟", badge:"promo", desc:"Colorway exclusif. Cuir pleine fleur, semelle vulcanisée. Limited stock." },
+  { id:5, name:"Cargo Pants", cat:"Vêtements", price:89, emoji:"👖", badge:"new", desc:"Cargo technique, 6 poches, coupe relaxed. Tissu ripstop déperlant." },
+  { id:6, name:"Sac à dos 20L", cat:"Accessoires", price:55, emoji:"🎒", badge:null, desc:"Nylon résistant, poche laptop 15\", bretelles ergonomiques rembourrées." },
+  { id:7, name:"New Balance 550", cat:"Sneakers", price:130, emoji:"👟", badge:null, desc:"Silhouette court rétro. Cuir et mesh, semelle Eva ultra-légère." },
+  { id:8, name:"Windbreaker", cat:"Vêtements", price:95, emoji:"🧥", badge:"promo", desc:"Coupe-vent léger, imperméable, packable. Idéal mi-saison." },
+  { id:9, name:"Bonnet Ribbed", cat:"Accessoires", price:22, emoji:"🎩", badge:null, desc:"Laine mélangée, côtes serrées. Chaud sans être trop épais." },
+  { id:10, name:"Dunk Low", cat:"Sneakers", price:115, emoji:"👟", badge:null, desc:"Colorway classique, cuir lisse et daim. Semelle gomme basse." },
+];
+
+// ========== ÉTAT ==========
+let activeFilter = "Tous";
+let cart = [];
+let currentProduct = null;
+
+// ========== INIT ==========
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+const categories = ["Tous", ...new Set(PRODUCTS.map(p => p.cat))];
+
+function initFilters() {
+  const el = document.getElementById("filters");
+  el.innerHTML = categories.map(c => `
+    <button class="filter-btn ${c === activeFilter ? 'active' : ''}" onclick="setFilter('${c}')">${c}</button>
+  `).join('');
+}
+
+function setFilter(cat) {
+  activeFilter = cat;
+  initFilters();
+  renderProducts();
+}
+
+function renderProducts() {
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const sort = document.getElementById("sortSelect").value;
+
+  let products = PRODUCTS.filter(p => {
+    const matchCat = activeFilter === "Tous" || p.cat === activeFilter;
+    const matchSearch = p.name.toLowerCase().includes(search) || p.cat.toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+
+  if (sort === "price-asc") products.sort((a,b) => a.price - b.price);
+  else if (sort === "price-desc") products.sort((a,b) => b.price - a.price);
+  else if (sort === "name") products.sort((a,b) => a.name.localeCompare(b.name));
+
+  document.getElementById("resultsCount").textContent = `${products.length} produit${products.length > 1 ? 's' : ''}`;
+
+  const grid = document.getElementById("grid");
+
+  if (products.length === 0) {
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><p>Aucun produit trouvé</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = products.map(p => `
+    <div class="card" onclick="openModal(${p.id})">
+      ${p.badge ? `<div class="badge ${p.badge === 'new' ? 'new' : ''}">${p.badge}</div>` : ''}
+      <div class="card-img">${p.emoji}</div>
+      <div class="card-body">
+        <div class="card-cat">${p.cat}</div>
+        <div class="card-name">${p.name}</div>
+        <div class="card-footer">
+          <span class="price">${p.price}€</span>
+          <button class="add-btn" onclick="addToCart(event, ${p.id})">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== MODAL ==========
+function openModal(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  currentProduct = p;
+  document.getElementById("modalImg").textContent = p.emoji;
+  document.getElementById("modalCat").textContent = p.cat;
+  document.getElementById("modalName").textContent = p.name;
+  document.getElementById("modalDesc").textContent = p.desc;
+  document.getElementById("modalPrice").textContent = p.price + "€";
+  document.getElementById("modalAddBtn").onclick = () => { addToCartById(p.id); closeModalDirect(); };
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modalOverlay")) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById("modalOverlay").classList.remove("open");
+}
+
+// ========== PANIER ==========
+function addToCart(e, id) {
+  e.stopPropagation();
+  addToCartById(id);
+}
+
+function addToCartById(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  const existing = cart.find(x => x.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...p, qty: 1 });
+  updateCartCount();
+  showToast(`${p.name} ajouté ! 🛒`);
+}
+
+function updateCartCount() {
+  const total = cart.reduce((s, x) => s + x.qty, 0);
+  document.getElementById("cartCount").textContent = total;
+}
+
+function showCart() {
+  if (cart.length === 0) { showToast("Panier vide 😅"); return; }
+  const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+  const summary = cart.map(x => `${x.name} x${x.qty} — ${x.price * x.qty}€`).join('\n');
+  if (tg) {
+    tg.showPopup({
+      title: "🛒 Mon panier",
+      message: summary + `\n\nTotal : ${total}€`,
+      buttons: [{ id: "order", type: "default", text: "Commander" }, { type: "cancel", text: "Fermer" }]
+    }, (btn) => {
+      if (btn === "order") tg.sendData(JSON.stringify({ action: "order", cart, total }));
+    });
+  } else {
+    alert(summary + `\n\nTotal : ${total}€`);
+  }
+}
+
+// ========== TOAST ==========
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+// ========== LAUNCH ==========
+initFilters();
+renderProducts();
+</script>
+</body>
+</html>
