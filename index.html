@@ -335,7 +335,7 @@ function save(){localStorage.setItem('bzl38',JSON.stringify(P))}
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
 
 function initMq(){
-  const ws=["BAZARDLAND38","SHIT","STOCK LIMITÉ","BEUH","BAZARDLAND","✦"];
+  const ws=["✦", "BAZARDLAND38","✦","SHIT","STOCK LIMITÉ","BEUH", "✦", "BAZARDLAND38","✦","SHIT","STOCK LIMITÉ","BEUH"];
   const s=ws.map(w=>`<span>${w}</span>`).join('');
   document.getElementById('mq').innerHTML=s+s+s;
 }
